@@ -4,7 +4,7 @@ on:
   release:
     types: [ published ]
   push:
-    branches: [ master, dev ]
+    branches: [ master, dev, travelsky ]
     tags-ignore: [ 'v*' ]
   pull_request:
   workflow_dispatch:
