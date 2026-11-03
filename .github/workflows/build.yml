@@ -13,10 +13,10 @@ on:
         type: boolean
         default: true
         description: "Nightly Build"
-      zju_connect_nightly:
-        type: boolean
-        default: false
-        description: "Use nightly zju-connect"
+      zju_connect_ref:
+        type: string
+        default: 'travelsky'
+        description: "foxwoods/zju-connect branch/tag to build"
       version:
         type: string
         default: ''
@@ -26,6 +26,8 @@ env:
   QT_VERSION: '6.10.3'
   TARGET_NAME: 'EZ4Connect'
   DISPLAY_NAME: 'EZ4Connect'
+  ZJU_CONNECT_REPO: 'https://github.com/foxwoods/zju-connect.git'
+  ZJU_CONNECT_REF: ${{ inputs.zju_connect_ref || 'travelsky' }}
 
 jobs:
   unit-tests:
@@ -91,10 +93,16 @@ jobs:
         run: |
           cmake --build build --target ${{ env.TARGET_NAME }} --config Release --parallel $(nproc)
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '^1.25'
+          cache: false
+
       - name: Download and copy files
         shell: pwsh
         run: |
-          .\scripts\deploy-windows.ps1 -TargetName "${{ env.TARGET_NAME }}" -DisplayName "${{ env.DISPLAY_NAME }}" -BuildDir "build" -Architecture "amd64" -Nightly ${{ github.event_name == 'workflow_dispatch' && inputs.zju_connect_nightly }}
+          .\scripts\deploy-windows.ps1 -TargetName "${{ env.TARGET_NAME }}" -DisplayName "${{ env.DISPLAY_NAME }}" -BuildDir "build" -Architecture "amd64" -ZjuConnectRef "${{ env.ZJU_CONNECT_REF }}"
           Compress-Archive -Path "${{ env.DISPLAY_NAME }}" -DestinationPath ${{ env.ARCHIVE_NAME }}.zip
 
       - name: Upload artifact
@@ -139,10 +147,16 @@ jobs:
         run: |
           cmake --build build --target ${{ env.TARGET_NAME }} --config Release --parallel $(nproc)
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '^1.25'
+          cache: false
+
       - name: Download and copy files
         shell: pwsh
         run: |
-          .\scripts\deploy-windows.ps1 -TargetName "${{ env.TARGET_NAME }}" -DisplayName "${{ env.DISPLAY_NAME }}" -BuildDir "build" -Architecture "arm64" -Nightly ${{ github.event_name == 'workflow_dispatch' && inputs.zju_connect_nightly }}
+          .\scripts\deploy-windows.ps1 -TargetName "${{ env.TARGET_NAME }}" -DisplayName "${{ env.DISPLAY_NAME }}" -BuildDir "build" -Architecture "arm64" -ZjuConnectRef "${{ env.ZJU_CONNECT_REF }}"
           Compress-Archive -Path "${{ env.DISPLAY_NAME }}" -DestinationPath ${{ env.ARCHIVE_NAME }}.zip
 
       - name: Upload artifact
@@ -186,9 +200,15 @@ jobs:
         run: |
           cmake --build build --target ${{ env.TARGET_NAME }} --parallel $(nproc)
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '^1.25'
+          cache: false
+
       - name: Download and copy files
         run: |
-          ./scripts/deploy-macos.sh "${{ env.TARGET_NAME }}" "build" "x86_64" "${{ github.event_name == 'workflow_dispatch' && inputs.zju_connect_nightly }}"
+          ./scripts/deploy-macos.sh "${{ env.TARGET_NAME }}" "build" "x86_64" "${{ env.ZJU_CONNECT_REF }}"
 
       - name: Import macOS signing certificate
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
@@ -291,9 +311,15 @@ jobs:
         run: |
           cmake --build build --target ${{ env.TARGET_NAME }} --parallel $(nproc)
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '^1.25'
+          cache: false
+
       - name: Download and copy files
         run: |
-          ./scripts/deploy-macos.sh "${{ env.TARGET_NAME }}" "build" "arm64" "${{ github.event_name == 'workflow_dispatch' && inputs.zju_connect_nightly }}"
+          ./scripts/deploy-macos.sh "${{ env.TARGET_NAME }}" "build" "arm64" "${{ env.ZJU_CONNECT_REF }}"
 
       - name: Import macOS signing certificate
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
@@ -396,9 +422,15 @@ jobs:
         run: |
           cmake --build build --target ${{ env.TARGET_NAME }} --parallel $(nproc)
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '^1.25'
+          cache: false
+
       - name: Download and copy files
         run: |
-          ./scripts/deploy-linux.sh "${{ env.TARGET_NAME }}" "${{ env.DISPLAY_NAME }}" "build" "x86_64" "${{ github.event_name == 'workflow_dispatch' && inputs.zju_connect_nightly }}"
+          ./scripts/deploy-linux.sh "${{ env.TARGET_NAME }}" "${{ env.DISPLAY_NAME }}" "build" "x86_64" "${{ env.ZJU_CONNECT_REF }}"
           mv *.AppImage ${{ env.ARCHIVE_NAME }}.AppImage
 
       - name: Upload artifact
@@ -447,9 +479,15 @@ jobs:
         run: |
           cmake --build build --target ${{ env.TARGET_NAME }} --parallel $(nproc)
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '^1.25'
+          cache: false
+
       - name: Download and copy files
         run: |
-          ./scripts/deploy-linux.sh "${{ env.TARGET_NAME }}" "${{ env.DISPLAY_NAME }}" "build" "arm64" "${{ github.event_name == 'workflow_dispatch' && inputs.zju_connect_nightly }}"
+          ./scripts/deploy-linux.sh "${{ env.TARGET_NAME }}" "${{ env.DISPLAY_NAME }}" "build" "arm64" "${{ env.ZJU_CONNECT_REF }}"
           mv *.AppImage ${{ env.ARCHIVE_NAME }}.AppImage
 
       - name: Upload artifact

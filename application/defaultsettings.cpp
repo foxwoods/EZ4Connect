@@ -21,8 +21,8 @@ void DefaultSettings::reset(QSettings &settings)
     settings.setValue("ZJUConnect/ServerPort", 443);
     settings.setValue("ZJUConnect/DNS", "");
     settings.setValue("ZJUConnect/DNSAuto", true);
-    settings.setValue("ZJUConnect/SecondaryDNS", "");
-    settings.setValue("ZJUConnect/LocalDNSServer", "");
+    settings.setValue("ZJUConnect/SecondaryDNS", "114.114.114.114");
+    settings.setValue("ZJUConnect/LocalDNSServer", "114.114.114.114");
     settings.setValue("ZJUConnect/DNSServerBind", "");
     settings.setValue("ZJUConnect/DNSTTL", 3600);
     settings.setValue("ZJUConnect/SOCKS5Port", 11080);
@@ -40,9 +40,9 @@ void DefaultSettings::reset(QSettings &settings)
     settings.setValue("ZJUConnect/PhoneCountryCode", "86");
     settings.setValue("ZJUConnect/PhoneNumber", "");
 
-    settings.setValue("ZJUConnect/MultiLine", false);
-    settings.setValue("ZJUConnect/KeepAlive", false);
-    settings.setValue("ZJUConnect/KeepAliveURL", "");
+    settings.setValue("ZJUConnect/MultiLine", true);
+    settings.setValue("ZJUConnect/KeepAlive", true);
+    settings.setValue("ZJUConnect/KeepAliveURL", "https://isgui-vpn.travelsky.com.cn/");
     settings.setValue("ZJUConnect/BindInterface", "");
     settings.setValue("ZJUConnect/OutsideAccess", false);
     settings.setValue("ZJUConnect/SkipDomainResource", false);
@@ -54,18 +54,18 @@ void DefaultSettings::reset(QSettings &settings)
     settings.setValue("ZJUConnect/DebugPCAP", false);
     settings.setValue("ZJUConnect/DebugTLSLog", false);
 
-    settings.setValue("ZJUConnect/TUNMode", false);
-    settings.setValue("ZJUConnect/AddRoute", false);
+    settings.setValue("ZJUConnect/TUNMode", true);
+    settings.setValue("ZJUConnect/AddRoute", true);
     settings.setValue("ZJUConnect/DNSHijack", false);
     settings.setValue("ZJUConnect/FakeIP", false);
     settings.setValue("ZJUConnect/TCPTunnelMode", false);
-    settings.setValue("ZJUConnect/AutoDetectInterface", false);
+    settings.setValue("ZJUConnect/AutoDetectInterface", true);
 
     settings.setValue("ZJUConnect/TCPPortForwarding", "");
     settings.setValue("ZJUConnect/UDPPortForwarding", "");
     settings.setValue("ZJUConnect/CustomDNS", "");
     settings.setValue("ZJUConnect/CustomProxyDomain", "");
-    settings.setValue("ZJUConnect/ExtraArguments", "");
+    settings.setValue("ZJUConnect/ExtraArguments", "--fake-windows");
 
     settings.setValue("Common/ConfigVersion", ApplicationConstants::ConfigVersion);
 }

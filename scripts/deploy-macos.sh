@@ -1,35 +1,25 @@
 #!/bin/bash
 # macOS deployment script
-# Usage: ./scripts/deploy-macos.sh "EZ4Connect" "build" "amd64" "false"
+# Usage: ./scripts/deploy-macos.sh "EZ4Connect" "build" "arm64" "travelsky"
 
 set -euo pipefail
 
 TARGET_NAME="${1:-EZ4Connect}"
 BUILD_DIR="${2:-build}"
 ARCH="${3:-arm64}"
-NIGHTLY="${4:-false}"
+ZJU_CONNECT_REF="${4:-travelsky}"
 APP_PATH="$TARGET_NAME.app"
 
 # Copy app bundle
 cp -R "$BUILD_DIR/$TARGET_NAME.app" .
 
-# Download and extract zju-connect
+# Build zju-connect from source into app bundle
 ZJU_ARCH="${ARCH}"
 if [ "$ARCH" = "x86_64" ]; then
     ZJU_ARCH="amd64"
 fi
 
-ZJU_RELEASE_PATH="latest/download"
-if [ "$NIGHTLY" = "true" ]; then
-    ZJU_RELEASE_PATH="download/nightly"
-fi
-
-curl -LO "https://github.com/Mythologyli/zju-connect/releases/$ZJU_RELEASE_PATH/zju-connect-darwin-$ZJU_ARCH.zip"
-unzip -o "zju-connect-darwin-$ZJU_ARCH.zip"
-rm "zju-connect-darwin-$ZJU_ARCH.zip"
-
-# Copy zju-connect into app bundle
-cp zju-connect "$APP_PATH/Contents/MacOS/"
+./scripts/build-zju-connect.sh darwin "$ZJU_ARCH" "$APP_PATH/Contents/MacOS/zju-connect" "$ZJU_CONNECT_REF"
 
 # Run macdeployqt
 macdeployqt "$APP_PATH"

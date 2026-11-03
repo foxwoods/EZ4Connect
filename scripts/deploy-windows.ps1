@@ -1,12 +1,13 @@
 # Windows deployment script
-# Usage: .\deploy-windows.ps1 -TargetName "EZ4Connect" -DisplayName "EZ4Connect" -BuildDir "build" -Architecture "amd64" -Nightly "false"
+# Usage: .\deploy-windows.ps1 -TargetName "EZ4Connect" -DisplayName "EZ4Connect" -BuildDir "build" -Architecture "amd64" -ZjuConnectRef "travelsky"
 
 param(
     [string]$TargetName = "EZ4Connect",
     [string]$DisplayName = "EZ4Connect",
     [string]$BuildDir = "build",
     [string]$Architecture = "amd64",
-    [string]$Nightly = "false"
+    [string]$ZjuConnectRef = "travelsky",
+    [string]$ZjuConnectRepo = $(if ($env:ZJU_CONNECT_REPO) { $env:ZJU_CONNECT_REPO } else { "https://github.com/foxwoods/zju-connect.git" })
 )
 
 Import-Module -Name Microsoft.PowerShell.Utility
@@ -21,13 +22,25 @@ Copy-Item -Path "../$BuildDir/Release/$TargetName.exe" -Destination .
 # Run windeployqt
 & windeployqt.exe "$TargetName.exe"
 
-# Download and extract zju-connect
-$ZjuReleasePath = if ($Nightly -eq "true") { "download/nightly" } else { "latest/download" }
-$ZjuUrl = "https://github.com/Mythologyli/zju-connect/releases/$ZjuReleasePath/zju-connect-windows-$Architecture.zip"
-$ZjuZipPath = "zju-connect-windows-$Architecture.zip"
-Invoke-WebRequest -Uri $ZjuUrl -OutFile $ZjuZipPath
-Expand-Archive -Path $ZjuZipPath -DestinationPath . -Force
-Remove-Item -Path $ZjuZipPath
+# Build zju-connect from source
+$ZjuSrcDir = "../zju-connect-src"
+$ZjuOutput = Join-Path (Get-Location) "zju-connect.exe"
+if (Test-Path $ZjuSrcDir) { Remove-Item -Recurse -Force $ZjuSrcDir }
+& git clone --depth 1 --branch $ZjuConnectRef $ZjuConnectRepo $ZjuSrcDir
+if ($LASTEXITCODE -ne 0) { throw "git clone zju-connect failed" }
+Push-Location $ZjuSrcDir
+$ZjuCommit = (& git rev-parse --short HEAD).Trim()
+# EZ4Connect parses "-version" output with the prefix "ZJU Connect v"
+$ZjuVersion = "v" + $ZjuConnectRef.TrimStart("v")
+$env:CGO_ENABLED = "0"
+$env:GOOS = "windows"
+$env:GOARCH = $Architecture
+& go build -v -trimpath -o $ZjuOutput -ldflags "-s -w -buildid= -X main.zjuConnectVersion=$ZjuVersion -X main.CommitID=$ZjuCommit" .
+$ZjuBuildExit = $LASTEXITCODE
+Remove-Item Env:GOOS, Env:GOARCH, Env:CGO_ENABLED
+Pop-Location
+if ($ZjuBuildExit -ne 0) { throw "go build zju-connect failed" }
+Remove-Item -Recurse -Force $ZjuSrcDir
 
 # Copy additional files
 Copy-Item -Path "../libs/wintun/bin/$Architecture/wintun.dll" -Destination .
