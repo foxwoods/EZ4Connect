@@ -77,6 +77,29 @@ bool comparesVersions()
     }
     return true;
 }
+
+bool checksCoreBranchHead()
+{
+    const QString head = "8060805aabbccddeeff00112233445566778899a";
+    const bool passed =
+        UpdateChecker::parseBranchHeadCommit(
+            QByteArray(R"({"sha":")") + head.toUtf8() + R"("})"
+        ) == std::optional<QString>(head)
+        && !UpdateChecker::parseBranchHeadCommit("not json").has_value()
+        && !UpdateChecker::parseBranchHeadCommit("{}").has_value()
+        && !UpdateChecker::parseBranchHeadCommit(R"({"sha":"xyz"})").has_value()
+        && UpdateChecker::coreCommitFromVersion("travelsky-8060805") == "8060805"
+        && UpdateChecker::coreCommitFromVersion("0.9.0").isEmpty()
+        && !UpdateChecker::isCoreOutdated("travelsky-8060805", head)
+        && UpdateChecker::isCoreOutdated("travelsky-1234567", head)
+        && UpdateChecker::isCoreOutdated("0.9.0", head)
+        && UpdateChecker::isCoreOutdated("错误", head);
+    if (!passed)
+    {
+        qCritical() << "checksCoreBranchHead failed";
+    }
+    return passed;
+}
 }
 
 int main(int argc, char *argv[])
@@ -84,5 +107,6 @@ int main(int argc, char *argv[])
     QCoreApplication app(argc, argv);
     return normalizesTags()
         && validatesReleaseResponses()
-        && comparesVersions() ? 0 : 1;
+        && comparesVersions()
+        && checksCoreBranchHead() ? 0 : 1;
 }

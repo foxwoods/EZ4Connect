@@ -314,7 +314,7 @@ void AuthDialogCoordinator::requestSsoLogin()
     }
 
     const QString serverHost =
-        settings->value("ZJUConnect/ServerAddress", "trust.hitsz.edu.cn").toString();
+        settings->value("ZJUConnect/ServerAddress", "isgui-vpn.travelsky.com.cn").toString();
     const int serverPort = settings->value("ZJUConnect/ServerPort", 443).toInt();
     QUrl serverUrl;
     serverUrl.setScheme("https");

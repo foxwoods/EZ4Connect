@@ -279,7 +279,7 @@
           <item row="1" column="1">
            <widget class="QLineEdit" name="serverAddressLineEdit">
             <property name="text">
-             <string>trust.hitsz.edu.cn</string>
+             <string>isgui-vpn.travelsky.com.cn</string>
             </property>
            </widget>
           </item>

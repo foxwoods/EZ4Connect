@@ -17,7 +17,7 @@ void DefaultSettings::reset(QSettings &settings)
     settings.setValue("Common/AutoReconnect", false);
     settings.setValue("Common/SystemProxyBypass", "");
 
-    settings.setValue("ZJUConnect/ServerAddress", "trust.hitsz.edu.cn");
+    settings.setValue("ZJUConnect/ServerAddress", "isgui-vpn.travelsky.com.cn");
     settings.setValue("ZJUConnect/ServerPort", 443);
     settings.setValue("ZJUConnect/DNS", "");
     settings.setValue("ZJUConnect/DNSAuto", true);

@@ -38,6 +38,9 @@ public:
     static QString normalizeVersionTag(const QString &tag);
     static std::optional<QString> parseReleaseVersion(const QByteArray &payload);
     static bool isNewerVersion(const QString &currentVersion, const QString &latestVersion);
+    static std::optional<QString> parseBranchHeadCommit(const QByteArray &payload);
+    static QString coreCommitFromVersion(const QString &coreVersion);
+    static bool isCoreOutdated(const QString &coreVersion, const QString &latestCommit);
 
 signals:
     void versionInfoChanged(const VersionInfo &versionInfo);

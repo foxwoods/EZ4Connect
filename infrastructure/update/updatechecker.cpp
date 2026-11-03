@@ -178,7 +178,8 @@ void UpdateChecker::check()
         QUrl(
             "https://api.github.com/repos/" +
             ApplicationConstants::CoreRepositoryName +
-            "/releases/latest"
+            "/commits/" +
+            ApplicationConstants::CoreBranchName
         )
     ));
 }
@@ -211,6 +212,75 @@ std::optional<QString> UpdateChecker::parseReleaseVersion(
     return version.isEmpty()
         ? std::nullopt
         : std::optional<QString>(version);
+}
+
+std::optional<QString> UpdateChecker::parseBranchHeadCommit(
+    const QByteArray &payload
+)
+{
+    QJsonParseError parseError;
+    const QJsonDocument document =
+        QJsonDocument::fromJson(payload, &parseError);
+    if (parseError.error != QJsonParseError::NoError || !document.isObject())
+    {
+        return std::nullopt;
+    }
+
+    const QJsonValue shaValue = document.object().value("sha");
+    if (!shaValue.isString())
+    {
+        return std::nullopt;
+    }
+
+    const QString sha = shaValue.toString().trimmed().toLower();
+    if (sha.size() < 7)
+    {
+        return std::nullopt;
+    }
+    for (const QChar character : sha)
+    {
+        if (!QStringLiteral("0123456789abcdef").contains(character))
+        {
+            return std::nullopt;
+        }
+    }
+    return sha;
+}
+
+QString UpdateChecker::coreCommitFromVersion(const QString &coreVersion)
+{
+    // Bundled core version format: "<branch>-<short commit>", e.g. "travelsky-8060805"
+    const qsizetype separator = coreVersion.lastIndexOf('-');
+    if (separator < 0)
+    {
+        return {};
+    }
+    const QString commit = coreVersion.mid(separator + 1).trimmed().toLower();
+    if (commit.size() < 7)
+    {
+        return {};
+    }
+    for (const QChar character : commit)
+    {
+        if (!QStringLiteral("0123456789abcdef").contains(character))
+        {
+            return {};
+        }
+    }
+    return commit;
+}
+
+bool UpdateChecker::isCoreOutdated(
+    const QString &coreVersion,
+    const QString &latestCommit
+)
+{
+    const QString currentCommit = coreCommitFromVersion(coreVersion);
+    if (currentCommit.isEmpty())
+    {
+        return true;
+    }
+    return !latestCommit.toLower().startsWith(currentCommit);
 }
 
 bool UpdateChecker::isNewerVersion(const QString &currentVersion, const QString &latestVersion)
@@ -289,13 +359,13 @@ void UpdateChecker::handleCoreReply(QNetworkReply *reply)
         return;
     }
 
-    const std::optional<QString> latestVersion =
-        parseReleaseVersion(reply->readAll());
+    const std::optional<QString> latestCommit =
+        parseBranchHeadCommit(reply->readAll());
     reply->deleteLater();
-    if (!latestVersion.has_value())
+    if (!latestCommit.has_value())
     {
         const QString reason =
-            QStringLiteral("响应中缺少有效的版本标签");
+            QStringLiteral("响应中缺少有效的提交哈希");
         qWarning().noquote() << "检查核心更新失败。原因是：" + reason;
         versions.coreLatest = QStringLiteral("检查失败");
         emit checkFailed(UpdateComponent::Core, reason);
@@ -303,12 +373,13 @@ void UpdateChecker::handleCoreReply(QNetworkReply *reply)
         return;
     }
 
+    versions.coreLatest =
+        ApplicationConstants::CoreBranchName + "-" + latestCommit->left(7);
     qInfo().noquote()
-        << "检查核心更新成功。最新版本：" + *latestVersion;
-    versions.coreLatest = *latestVersion;
+        << "检查核心更新成功。最新版本：" + versions.coreLatest;
     emit versionInfoChanged(versions);
 
-    if (isNewerVersion(versions.coreVersion, *latestVersion))
+    if (isCoreOutdated(versions.coreVersion, *latestCommit))
     {
         qInfo().noquote() << "核心版本存在更新，可手动更新或通知开发者更新。";
     }
