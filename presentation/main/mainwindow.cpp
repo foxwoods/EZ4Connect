@@ -27,6 +27,7 @@
 #include "infrastructure/storage/applicationpaths.h"
 #include "infrastructure/update/updatechecker.h"
 #include "presentation/coordinators/connectionuicontroller.h"
+#include "presentation/main/dockiconvisibilitycontroller.h"
 #include "presentation/dialogs/configurationguidedialog/configurationguidedialog.h"
 #include "presentation/presentationhelpers.h"
 #include "ui_mainwindow.h"
@@ -142,6 +143,10 @@ MainWindow::MainWindow(
                 updateConnectionState(connectionSession->state());
             });
     setupTrayIcon();
+#ifdef Q_OS_MACOS
+    // 窗口全部隐藏（最小化到托盘）时隐藏 Dock 图标
+    dockIconController = new DockIconVisibilityController(this);
+#endif
     setupProfileMenu();
 
     setWindowIcon(QIcon(QPixmap(":/resource/icon.png").scaled(
@@ -376,6 +381,11 @@ MainWindow::MainWindow(
             );
         }
     }
+
+#ifdef Q_OS_MACOS
+    // 静默启动时没有窗口显示/隐藏事件，需主动同步一次 Dock 图标状态
+    dockIconController->update();
+#endif
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

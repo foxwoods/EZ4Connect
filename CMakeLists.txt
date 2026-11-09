@@ -36,6 +36,7 @@ set(SOURCE_FILES
     main.cpp
     presentation/main/mainwindow.cpp
     presentation/main/mainwindowcoordinator.cpp
+    presentation/main/dockiconvisibilitycontroller.cpp
     presentation/coordinators/authdialogcoordinator.cpp
     presentation/coordinators/connectionuicontroller.cpp
     application/applicationlogger.cpp
@@ -99,8 +100,11 @@ elseif(APPLE)
 
     add_executable(${PROJECT_NAME} MACOSX_BUNDLE
         ${SOURCE_FILES}
+        infrastructure/platform/dockicon_mac.mm
         ${app_icon_macos}
     )
+
+    set(PLATFORM_LIBS "-framework AppKit")
 
     set_target_properties(${PROJECT_NAME}
         PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/resource/Info.plist")

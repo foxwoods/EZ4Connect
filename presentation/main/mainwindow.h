@@ -12,6 +12,8 @@
 #include "application/systemproxysession.h"
 #include "presentation/dialogs/settingwindow/settingwindow.h"
 #include "presentation/coordinators/authdialogcoordinator.h"
+
+class DockIconVisibilityController;
 #include "presentation/main/mainwindowcoordinator.h"
 
 namespace Ui
@@ -94,6 +96,7 @@ private:
 
     Ui::MainWindow *ui;
     QSystemTrayIcon *trayIcon;
+    DockIconVisibilityController *dockIconController = nullptr;
     QMenu *trayMenu;
     QMenu *trayProfileMenu;
     QAction *trayConnectAction;
