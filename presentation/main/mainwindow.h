@@ -12,8 +12,6 @@
 #include "application/systemproxysession.h"
 #include "presentation/dialogs/settingwindow/settingwindow.h"
 #include "presentation/coordinators/authdialogcoordinator.h"
-
-class DockIconVisibilityController;
 #include "presentation/main/mainwindowcoordinator.h"
 
 namespace Ui
@@ -22,6 +20,7 @@ namespace Ui
 }
 
 class ApplicationLogger;
+class DockIconVisibilityController;
 class ApplicationLogFile;
 class ConnectionUiController;
 class UpdateChecker;
